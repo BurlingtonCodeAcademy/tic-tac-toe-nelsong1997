@@ -3,14 +3,12 @@ body {
   width: 1000px;
   margin: 10px auto;
   text-align: center;
-  padding: 10px;
-  user-select: none;
 }
 
 h2 {
   font-size: 30px;
   text-align: center;
-  height: 75px;
+  font-family: 'Comic Sans MS';
 }
 
 span{
@@ -21,7 +19,7 @@ span{
 div[id^="row-"] div {
   width: 200px;
   height: 200px;
-  border: 1px solid red;
+  border: 1px solid black;
   float: left;
 
 }
@@ -53,4 +51,13 @@ div.board {
   width: 608px;
   overflow: hidden;
   margin: 0 auto;
+}
+
+div[id^="cell-"] {
+  font-family: 'Comic Sans MS';
+  font-size: 100px;
+}
+
+h3 {
+  font-family: 'Comic Sans MS'
 }
