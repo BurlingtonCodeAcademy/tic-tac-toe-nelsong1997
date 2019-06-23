@@ -56,7 +56,7 @@ div.board {
 
 div[id^="cell-"] {
   font-family: 'Comic Sans MS';
-  font-size: 100px;
+  font-size: 125px;
   color: #22ff00;
 }
 
@@ -84,4 +84,8 @@ button {
 p {
   color: yellow;
   font-family: 'Comic Sans MS'
+}
+
+form {
+  background-color: green
 }

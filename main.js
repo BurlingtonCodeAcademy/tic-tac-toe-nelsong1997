@@ -1,3 +1,4 @@
+let gamesPlayed = 0;
 let startTime = Date.now()
 let turnCount = 0;
 let whoseTurn = "X";
@@ -10,8 +11,16 @@ let cells = [];
 let startOverButton = document.getElementById("startOver");
 startOverButton.style = "opacity: 0";
 let timer = document.getElementById("timer")
-let playerXName = "Player X"
-let playerOName = "Player O"
+let playerX = {
+  name: "Player X",
+  type: "Human",
+  winCount: 0
+}
+let playerO = {
+  name: "Player O",
+  type: "Human",
+  winCount: 0
+}
 let statusMessage = document.getElementById("status");
 statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
 let changeNamesButton = document.getElementById("changeNames")
@@ -28,8 +37,14 @@ let states = {
 
 function restartGame() {
   resetTimer();
+  runTimer();
+  gamesPlayed++;
   turnCount = 0;
-  whoseTurn = "X";
+  if (gamesPlayed%2===0) {
+    whoseTurn = "X";
+  } else {
+    whoseTurn = "O";
+  }
   occupiedCells = {
     all: [],
     X: [],
@@ -42,6 +57,7 @@ function restartGame() {
   for (cell of cells) {
     cell.textContent = '';
   }
+  console.log("restarting " + gamesPlayed + "th game...")
 }
 
 function enterState(newState) {
@@ -60,19 +76,6 @@ startOverButton.addEventListener("click", () => {
   if (turnCount > 0) {
     restartGame();
   }
-});
-
-changeNamesButton.addEventListener("click", () => {
-  if (playerXNameInput.value.length > 0) {
-    playerXName = playerXNameInput.value;
-    playerXNameInput.value = '';
-  }
-  if (playerONameInput.value.length > 0) {
-    playerOName = playerONameInput.value; 
-    playerONameInput.value = '';
-  }
-  statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!"
-  console.log('names changed to: ' + playerXName + ', ' + playerOName)
 });
 
 function findAllCells() {
@@ -199,10 +202,10 @@ function setDifference(minuend, subtrahend) {
 
 function XOToPlayerName (whoseTurn) {
   if (whoseTurn==='X') {
-    return playerXName;
+    return playerX.name;
   }
   if (whoseTurn==='O') {
-    return playerOName;
+    return playerO.name;
   }
 }
 
@@ -212,23 +215,54 @@ function resetTimer() {
 
 function runTimer() {
   setTimeout(()=>{
-  let totalMs = Date.now()-startTime; //I continually reference date.now because if I just waited 1000ms and then added 1 totalSeconds, the inaccuracy of setTimeout would eventually become non-negligible
-  let totalSeconds = Math.round(totalMs/1000);
-  let seconds = totalSeconds - 60*(Math.floor(totalSeconds/60));
-  let totalMinutes = Math.floor(totalSeconds/60);
-  let minutes = totalMinutes - 60*(Math.floor(totalMinutes/60));
-  let hours = Math.floor((totalMinutes)/60)
-  if (seconds < 10) {
-    seconds = "0" + seconds;
+  if (currentState==="gameStarted") {
+    let totalMs = Date.now()-startTime; //I continually reference date.now because if I just waited 1000ms and then added 1 totalSeconds, the inaccuracy of setTimeout would eventually become non-negligible
+    let totalSeconds = Math.round(totalMs/1000);
+    let seconds = totalSeconds - 60*(Math.floor(totalSeconds/60));
+    let totalMinutes = Math.floor(totalSeconds/60);
+    let minutes = totalMinutes - 60*(Math.floor(totalMinutes/60));
+    let hours = Math.floor((totalMinutes)/60)
+    if (seconds < 10) {
+      seconds = "0" + seconds;
+    }
+    if (minutes < 10) {
+      minutes = "0" + minutes;
+    }
+    if (hours < 10) {
+      hours = "0" + hours;
+    }
+    timer.textContent = "Time elapsed: " + hours + ":" + minutes + ":" + seconds
+    runTimer();
   }
-  if (minutes < 10) {
-    minutes = "0" + minutes;
-  }
-  if (hours < 10) {
-    hours = "0" + hours;
-  }
-  timer.textContent = "Time elapsed: " + hours + ":" + minutes + ":" + seconds
-  runTimer();
   }, 100)
 }
 runTimer();
+
+let optionsButton = document.getElementById('options');
+let optionsDialog = document.getElementById('optionsDialog');
+let selectX = document.getElementsByTagName('select')[0];
+let selectO = document.getElementsByTagName('select')[1];
+let confirmButton = document.getElementById('confirmBtn');
+
+optionsButton.addEventListener('click', function onOpen() {
+  if (typeof optionsDialog.showModal === "function") {
+    optionsDialog.showModal();
+  } else {
+    alert("The dialog API is not supported by this browser");
+  }
+});
+
+confirmButton.addEventListener('click', ()=> {
+  playerX.type = selectX.value;
+  playerO.type = selectO.value;
+  if (playerXNameInput.value.length > 0) {
+    playerX.name = playerXNameInput.value;
+    playerXNameInput.value = '';
+  }
+  if (playerONameInput.value.length > 0) {
+    playerO.name = playerONameInput.value; 
+    playerONameInput.value = '';
+  }
+  statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!"
+  console.log("Player X is a " + playerX.type + " with name " + playerX.name + " and player O is a " + playerO.type + " with name " + playerO.name)
+});

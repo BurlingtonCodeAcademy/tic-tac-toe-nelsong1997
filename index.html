@@ -32,11 +32,35 @@
 
   <div>
     <button id="startOver" type="button">Start Over</button>
-    <label for="playerXName">Player X's Name</label>
-    <input type="text" id="playerXName" placeholder="Player X" minlength="1" maxlength="16">
-    <label for="playerOName">Player O's Name</label>
-    <input type="text" id="playerOName" placeholder="Player O" minlength="1" maxlength="16">
-    <button id="changeNames" type="button">Change Names</button>
+    <dialog id="optionsDialog">
+      <form method="dialog">
+        <p><label>Player X's type:
+          <select>
+            <option>Human</option>
+            <option>Computer</option>
+          </select>
+        </label></p>
+        <p><label>Player X's name:
+          <input type="text" id="playerXName" placeholder="Player X" minlength="1" maxlength="16">
+        </label></p>
+        <p><label>Player O type:
+          <select>
+            <option>Human</option>
+            <option>Computer</option>
+          </select>
+        </label></p>
+        <p><label>Player O's name:
+          <input type="text" id="playerOName" placeholder="Player O" minlength="1" maxlength="16">
+        </label></p>
+        <menu>
+          <button value="cancel">Cancel</button>
+          <button id="confirmBtn" value="default">OK</button>
+        </menu>
+      </form>
+    </dialog>
+    <menu>
+      <button id="options">Options</button>
+    </menu>
     <p id="timer">Time Elapsed: 00:00:00</p>
   </div>
   <script src="main.js"></script>
