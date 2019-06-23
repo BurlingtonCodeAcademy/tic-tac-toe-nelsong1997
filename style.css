@@ -64,3 +64,24 @@ h3 {
   font-family: 'Comic Sans MS';
   color: yellow;
 }
+
+input {
+  margin-top: 10px;
+  font-family: 'Comic Sans MS';
+}
+
+label {
+  color: yellow;
+  font-family: 'Comic Sans MS'
+}
+
+button {
+  background-color: yellow;
+  color: blue;
+  font-family: 'Comic Sans MS'
+}
+
+p {
+  color: yellow;
+  font-family: 'Comic Sans MS'
+}

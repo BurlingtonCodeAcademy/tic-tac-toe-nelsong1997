@@ -1,3 +1,4 @@
+let startTime = Date.now()
 let turnCount = 0;
 let whoseTurn = "X";
 let occupiedCells = {
@@ -8,10 +9,16 @@ let occupiedCells = {
 let cells = [];
 let startOverButton = document.getElementById("startOver");
 startOverButton.style = "opacity: 0";
+let timer = document.getElementById("timer")
+let playerXName = "Player X"
+let playerOName = "Player O"
 let statusMessage = document.getElementById("status");
-statusMessage.textContent = "Player " + whoseTurn + "'s turn!";
+statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
+let changeNamesButton = document.getElementById("changeNames")
 let currentState = "gameStarted";
 let winningTriple = [];
+let playerXNameInput = document.getElementById("playerXName")
+let playerONameInput = document.getElementById("playerOName")
 
 let states = {
   waiting: { canChangeTo: ["gameStarted"] },
@@ -20,6 +27,7 @@ let states = {
 };
 
 function restartGame() {
+  resetTimer();
   turnCount = 0;
   whoseTurn = "X";
   occupiedCells = {
@@ -28,7 +36,7 @@ function restartGame() {
     O: []
   };
   startOverButton.style = "opacity: 0";
-  statusMessage.textContent = "Player " + whoseTurn + "'s turn!";
+  statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
   currentState = "gameStarted";
   winningTriple = [];
   for (cell of cells) {
@@ -52,6 +60,19 @@ startOverButton.addEventListener("click", () => {
   if (turnCount > 0) {
     restartGame();
   }
+});
+
+changeNamesButton.addEventListener("click", () => {
+  if (playerXNameInput.value.length > 0) {
+    playerXName = playerXNameInput.value;
+    playerXNameInput.value = '';
+  }
+  if (playerONameInput.value.length > 0) {
+    playerOName = playerONameInput.value; 
+    playerONameInput.value = '';
+  }
+  statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!"
+  console.log('names changed to: ' + playerXName + ', ' + playerOName)
 });
 
 function findAllCells() {
@@ -81,9 +102,7 @@ function playCell(cell) {
       if (checkForWin(cellToNumber(cell))) {
         console.log("player " + whoseTurn + " won with cells " + winningTriple);
         enterState("gameFinished");
-        statusMessage.textContent =
-          "Player " +
-          whoseTurn +
+        statusMessage.textContent = XOToPlayerName(whoseTurn) +
           " has won with cells " +
           winningTriple +
           "!!!!";
@@ -100,7 +119,7 @@ function playCell(cell) {
         whoseTurn = "X";
       }
       if (turnCount < 9) {
-        statusMessage.textContent = "Player " + whoseTurn + "'s turn!";
+        statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
       } else {
         statusMessage.textContent = "The match has ended in a draw...";
       }
@@ -177,3 +196,39 @@ function setDifference(minuend, subtrahend) {
   }
   return returnArray;
 }
+
+function XOToPlayerName (whoseTurn) {
+  if (whoseTurn==='X') {
+    return playerXName;
+  }
+  if (whoseTurn==='O') {
+    return playerOName;
+  }
+}
+
+function resetTimer() {
+  startTime = Date.now();
+}
+
+function runTimer() {
+  setTimeout(()=>{
+  let totalMs = Date.now()-startTime; //I continually reference date.now because if I just waited 1000ms and then added 1 totalSeconds, the inaccuracy of setTimeout would eventually become non-negligible
+  let totalSeconds = Math.round(totalMs/1000);
+  let seconds = totalSeconds - 60*(Math.floor(totalSeconds/60));
+  let totalMinutes = Math.floor(totalSeconds/60);
+  let minutes = totalMinutes - 60*(Math.floor(totalMinutes/60));
+  let hours = Math.floor((totalMinutes)/60)
+  if (seconds < 10) {
+    seconds = "0" + seconds;
+  }
+  if (minutes < 10) {
+    minutes = "0" + minutes;
+  }
+  if (hours < 10) {
+    hours = "0" + hours;
+  }
+  timer.textContent = "Time elapsed: " + hours + ":" + minutes + ":" + seconds
+  runTimer();
+  }, 100)
+}
+runTimer();
