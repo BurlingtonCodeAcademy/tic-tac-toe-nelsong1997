@@ -1,5 +1,5 @@
-let gamesPlayed = 0;
-let startTime = Date.now()
+let gamesPlayed = 1;
+let startTime = Date.now();
 let turnCount = 0;
 let whoseTurn = "X";
 let occupiedCells = {
@@ -10,24 +10,26 @@ let occupiedCells = {
 let cells = [];
 let startOverButton = document.getElementById("startOver");
 startOverButton.style = "opacity: 0";
-let timer = document.getElementById("timer")
+let timer = document.getElementById("timer");
 let playerX = {
   name: "Player X",
   type: "Human",
   winCount: 0
-}
+};
 let playerO = {
   name: "Player O",
   type: "Human",
   winCount: 0
-}
+};
 let statusMessage = document.getElementById("status");
 statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
-let changeNamesButton = document.getElementById("changeNames")
+let changeNamesButton = document.getElementById("changeNames");
 let currentState = "gameStarted";
 let winningTriple = [];
-let playerXNameInput = document.getElementById("playerXName")
-let playerONameInput = document.getElementById("playerOName")
+let playerXNameInput = document.getElementById("playerXName");
+let playerONameInput = document.getElementById("playerOName");
+let playerXWinCount = document.getElementById("playerXwins");
+let playerOWinCount = document.getElementById("playerOwins");
 
 let states = {
   waiting: { canChangeTo: ["gameStarted"] },
@@ -40,7 +42,7 @@ function restartGame() {
   runTimer();
   gamesPlayed++;
   turnCount = 0;
-  if (gamesPlayed%2===0) {
+  if (gamesPlayed % 2 === 0) {
     whoseTurn = "X";
   } else {
     whoseTurn = "O";
@@ -55,9 +57,11 @@ function restartGame() {
   currentState = "gameStarted";
   winningTriple = [];
   for (cell of cells) {
-    cell.textContent = '';
+    cell.textContent = "";
+    cell.style.color = "#22ff00";
   }
-  console.log("restarting " + gamesPlayed + "th game...")
+  console.log("restarting " + gamesPlayed + "th game...");
+  computerPlays();
 }
 
 function enterState(newState) {
@@ -85,11 +89,34 @@ function findAllCells() {
     count++;
   }
 }
-
 findAllCells();
 
 cells.forEach(cell => {
-  cell.addEventListener("click", () => playCell(cell));
+  cell.addEventListener("click", () => {
+    if (XOToPlayerType(whoseTurn) === "Human") {
+      playCell(cell);
+    }
+  });
+});
+
+cells.forEach(cell => {
+  cell.addEventListener("mouseenter", () => {
+    console.log("hi")
+    if (XOToPlayerType(whoseTurn) === "Human") {
+      considerCell(cell);
+    }
+  });
+});
+
+cells.forEach(cell => {
+  cell.addEventListener("mouseout", () => {
+    console.log("bye")
+    if (XOToPlayerType(whoseTurn) === "Human" &&
+    occupiedCells.all.includes(cellToNumber(cell))===false) {
+      cell.style = "opacity: 1"
+      cell.textContent = ''
+    }
+  });
 });
 
 function playCell(cell) {
@@ -97,18 +124,32 @@ function playCell(cell) {
     currentState === "gameStarted" &&
     occupiedCells.all.includes(cellToNumber(cell)) === false
   ) {
-    startOverButton.style = "opacity: 1"
+    startOverButton.style = "opacity: 1";
     cell.textContent = whoseTurn;
+    cell.style = "opacity: 1"
     turnCount++;
     if (turnCount >= 5) {
       //no one can win until turn 5
       if (checkForWin(cellToNumber(cell))) {
         console.log("player " + whoseTurn + " won with cells " + winningTriple);
         enterState("gameFinished");
-        statusMessage.textContent = XOToPlayerName(whoseTurn) +
+        if (whoseTurn==="X") {
+          playerX.winCount++
+        } else if (whoseTurn==="O") {
+          playerO.winCount++
+        }
+        playerXWinCount.textContent = playerX.name + "'s wins: " + playerX.winCount
+        playerOWinCount.textContent = playerO.name + "'s wins: " + playerO.winCount
+        statusMessage.textContent =
+          XOToPlayerName(whoseTurn) +
           " has won with cells " +
-          winningTriple +
+          winningTriple[0] +
+          ", " +
+          winningTriple[1] +
+          ", and " +
+          winningTriple[2] +
           "!!!!";
+        flashWinningCells();
       }
     }
     occupiedCells[whoseTurn].push(cellToNumber(cell));
@@ -130,6 +171,7 @@ function playCell(cell) {
     console.log("turn: " + turnCount);
     console.log("x occupies: " + occupiedCells["X"]);
     console.log("o occupies: " + occupiedCells["O"]);
+    setTimeout(() => computerPlays(), 1000);
   }
 }
 
@@ -200,12 +242,26 @@ function setDifference(minuend, subtrahend) {
   return returnArray;
 }
 
-function XOToPlayerName (whoseTurn) {
-  if (whoseTurn==='X') {
+function randomInteger(min, max) {
+  let range = max - min + 1;
+  return min + Math.floor(Math.random() * range);
+}
+
+function XOToPlayerName(whoseTurn) {
+  if (whoseTurn === "X") {
     return playerX.name;
   }
-  if (whoseTurn==='O') {
+  if (whoseTurn === "O") {
     return playerO.name;
+  }
+}
+
+function XOToPlayerType(whoseTurn) {
+  if (whoseTurn === "X") {
+    return playerX.type;
+  }
+  if (whoseTurn === "O") {
+    return playerO.type;
   }
 }
 
@@ -214,37 +270,56 @@ function resetTimer() {
 }
 
 function runTimer() {
-  setTimeout(()=>{
-  if (currentState==="gameStarted") {
-    let totalMs = Date.now()-startTime; //I continually reference date.now because if I just waited 1000ms and then added 1 totalSeconds, the inaccuracy of setTimeout would eventually become non-negligible
-    let totalSeconds = Math.round(totalMs/1000);
-    let seconds = totalSeconds - 60*(Math.floor(totalSeconds/60));
-    let totalMinutes = Math.floor(totalSeconds/60);
-    let minutes = totalMinutes - 60*(Math.floor(totalMinutes/60));
-    let hours = Math.floor((totalMinutes)/60)
-    if (seconds < 10) {
-      seconds = "0" + seconds;
+  setTimeout(() => {
+    if (currentState === "gameStarted") {
+      let totalMs = Date.now() - startTime; //I continually reference date.now because if I just waited 1000ms and then added 1 totalSeconds, the inaccuracy of setTimeout would eventually become non-negligible
+      let totalSeconds = Math.round(totalMs / 1000);
+      let seconds = totalSeconds - 60 * Math.floor(totalSeconds / 60);
+      let totalMinutes = Math.floor(totalSeconds / 60);
+      let minutes = totalMinutes - 60 * Math.floor(totalMinutes / 60);
+      let hours = Math.floor(totalMinutes / 60);
+      if (seconds < 10) {
+        seconds = "0" + seconds;
+      }
+      if (minutes < 10) {
+        minutes = "0" + minutes;
+      }
+      if (hours < 10) {
+        hours = "0" + hours;
+      }
+      timer.textContent =
+        "Time elapsed: " + hours + ":" + minutes + ":" + seconds;
+      runTimer();
     }
-    if (minutes < 10) {
-      minutes = "0" + minutes;
-    }
-    if (hours < 10) {
-      hours = "0" + hours;
-    }
-    timer.textContent = "Time elapsed: " + hours + ":" + minutes + ":" + seconds
-    runTimer();
-  }
-  }, 100)
+  }, 100);
 }
 runTimer();
 
-let optionsButton = document.getElementById('options');
-let optionsDialog = document.getElementById('optionsDialog');
-let selectX = document.getElementsByTagName('select')[0];
-let selectO = document.getElementsByTagName('select')[1];
-let confirmButton = document.getElementById('confirmBtn');
+function computerPlays() {
+  if (XOToPlayerType(whoseTurn) === "Computer") {
+    let allCells = Array(9);
+    let i = 0;
+    while (i < 9) {
+      allCells[i] = i;
+      i++;
+    }
+    let unoccupiedCells = setDifference(allCells, occupiedCells.all);
+    console.log("these cells are unoccupied: " + unoccupiedCells);
+    let choiceNum =
+      unoccupiedCells[randomInteger(0, unoccupiedCells.length - 1)];
+    console.log("computer: I have chosen cell number " + choiceNum);
+    let choiceCell = document.getElementById("cell-" + choiceNum);
+    playCell(choiceCell);
+  }
+}
 
-optionsButton.addEventListener('click', function onOpen() {
+let optionsButton = document.getElementById("options");
+let optionsDialog = document.getElementById("optionsDialog");
+let selectX = document.getElementsByTagName("select")[0];
+let selectO = document.getElementsByTagName("select")[1];
+let confirmButton = document.getElementById("confirmBtn");
+
+optionsButton.addEventListener("click", function onOpen() {
   if (typeof optionsDialog.showModal === "function") {
     optionsDialog.showModal();
   } else {
@@ -252,17 +327,58 @@ optionsButton.addEventListener('click', function onOpen() {
   }
 });
 
-confirmButton.addEventListener('click', ()=> {
+confirmButton.addEventListener("click", () => {
   playerX.type = selectX.value;
   playerO.type = selectO.value;
   if (playerXNameInput.value.length > 0) {
     playerX.name = playerXNameInput.value;
-    playerXNameInput.value = '';
+    playerXNameInput.value = "";
   }
   if (playerONameInput.value.length > 0) {
-    playerO.name = playerONameInput.value; 
-    playerONameInput.value = '';
+    playerO.name = playerONameInput.value;
+    playerONameInput.value = "";
   }
-  statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!"
-  console.log("Player X is a " + playerX.type + " with name " + playerX.name + " and player O is a " + playerO.type + " with name " + playerO.name)
+  playerXWinCount.textContent = playerX.name + "'s wins: " + playerX.winCount
+  playerOWinCount.textContent = playerO.name + "'s wins: " + playerO.winCount
+  statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
+  setTimeout(() => computerPlays(), 1000);
+  console.log(
+    "Player X is a " +
+      playerX.type +
+      " with name " +
+      playerX.name +
+      " and player O is a " +
+      playerO.type +
+      " with name " +
+      playerO.name
+  );
 });
+
+function flashWinningCells() {
+  let winningCells = [];
+  for (cell of winningTriple) {
+    winningCells.push(document.getElementById("cell-" + cell));
+  }
+  if (currentState === "gameFinished") {
+    if (winningCells[0].style.color!=="pink") {
+      for (cell of winningCells) {
+        cell.style = "color: pink";
+      }
+    } else {
+      for (cell of winningCells) {
+        cell.style = "color: white";
+      }
+    }
+    setTimeout(flashWinningCells, 500)
+  } else {
+    return;
+  }
+}
+
+function considerCell (cell) {
+  if (currentState === "gameStarted" &&
+  occupiedCells.all.includes(cellToNumber(cell)) === false) {
+    cell.textContent = whoseTurn;
+    cell.style = "opacity: .5"
+  }
+}
