@@ -340,7 +340,9 @@ confirmButton.addEventListener("click", () => {
   }
   playerXWinCount.textContent = playerX.name + "'s wins: " + playerX.winCount
   playerOWinCount.textContent = playerO.name + "'s wins: " + playerO.winCount
-  statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
+  if (currentState==="gameStarted") {
+    statusMessage.textContent = XOToPlayerName(whoseTurn) + "'s turn!";
+  }
   setTimeout(() => computerPlays(), 1000);
   console.log(
     "Player X is a " +
