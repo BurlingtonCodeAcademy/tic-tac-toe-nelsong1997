@@ -1,16 +1,15 @@
 body {
-  background-color: rgb(255, 255, 255);
+  background-color: blue;
   width: 1000px;
   margin: 10px auto;
   text-align: center;
-  padding: 10px;
-  user-select: none;
 }
 
 h2 {
   font-size: 30px;
   text-align: center;
-  height: 75px;
+  font-family: 'Comic Sans MS';
+  color: yellow;
 }
 
 span{
@@ -21,7 +20,7 @@ span{
 div[id^="row-"] div {
   width: 200px;
   height: 200px;
-  border: 1px solid red;
+  border: 1px solid yellow;
   float: left;
 
 }
@@ -53,4 +52,40 @@ div.board {
   width: 608px;
   overflow: hidden;
   margin: 0 auto;
+}
+
+div[id^="cell-"] {
+  font-family: 'Comic Sans MS';
+  font-size: 125px;
+  color: #22ff00;
+}
+
+h3 {
+  font-family: 'Comic Sans MS';
+  color: yellow;
+}
+
+input {
+  margin-top: 10px;
+  font-family: 'Comic Sans MS';
+}
+
+label {
+  color: yellow;
+  font-family: 'Comic Sans MS'
+}
+
+button {
+  background-color: yellow;
+  color: blue;
+  font-family: 'Comic Sans MS'
+}
+
+p {
+  color: yellow;
+  font-family: 'Comic Sans MS'
+}
+
+form {
+  background-color: green
 }
